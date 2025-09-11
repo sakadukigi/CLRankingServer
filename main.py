@@ -6,6 +6,8 @@ app = Flask(__name__)
 lastestFileName = ""
 rankingData = {"lastUpdate" : datetime.datetime.today().strftime("%Y/%m/%d %H:%M:%S"),
                "data" : []}
+with open("password.txt") as f:
+    PASSWORD = f.read()
 
 @app.route("/upload", methods=['GET', 'POST'])
 def UploadCsvDataPage():
@@ -14,14 +16,16 @@ def UploadCsvDataPage():
     if request.method=="GET":
         return render_template("uploadPage.htm")
     else:
+        if request.form["pass"] != PASSWORD:
+            return 'パスワードが違います✖<br><a href="/upload">戻る</a>'
         f = request.files["file"]
         if f.content_type!="text/csv":
-            return "ファイル形式が違います✖"
+            return  'ファイル形式が違います✖<br><a href="/upload">戻る</a>'
 
         lastestFileName = "temp/"+f.filename
         f.save(lastestFileName)
         updateDataDict()
-        return "<p>OK 200</p>"
+        return "<h1>アップロードに成功しました</h1><b><p>このページを閉じてください</p>"
 
 def updateDataDict():
     global rankingData
@@ -63,6 +67,21 @@ def updateDataDict():
 @app.route("/download")
 def DataDownload():
     return jsonify(rankingData)
+
+@app.route("/web_viewer")
+def webViewer():
+    index = 0
+    result = ""
+    result += "<title>ChampionLeague ランキング</title>\n"
+    result += f'<p>Update : {rankingData["lastUpdate"]}</p>\n'
+    result += "<table>\n"
+    result += "<tr><th>Rank</th><th>PlayerName</th><th>Points</th><th>G</th></tr>\n"
+    for i in rankingData["data"]:
+        index += 1
+        result += f'<tr><td>{index}</td><td>{i["name"]}</td><td>{i["point"]}</td><td>{i["battleAmount"]}</td></tr>\n'
+    result += "</table>"
+
+    return result
 
 if __name__=="__main__":
     app.run(debug=False,port=10000)

@@ -5,7 +5,9 @@
     <body>
         <h2>Upload CSV</h2>
         <form action="/upload" method="POST" enctype="multipart/form-data">
-      <input type="file" name="file" accept="text/csv">
+      <input type="file" name="file" accept="text/csv"><br>
+        <label for="pass">パスワード</label>
+      <input type="password" id="pass" name="pass">
       <input type="submit">
     </form>
     </body>
